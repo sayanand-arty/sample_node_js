@@ -1,27 +1,25 @@
 import "./login.css";
 import loginImage from "./images.jpg/images.jpg";
-import authService from "./services/authService";
+import authService from "../services/authService";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router";
 
 function Login() {
   const [name, setName] = useState("");
   const [pass, setPass] = useState("");
 
-  const handleName = (e) => {
-    setName(e.target.value);
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    try {
+      const result = await authService.login(name, pass);
+      console.log(result);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const handlePass = (e) => {
-    setPass(e.target.value);
-  };
-
-  const handleLogin = () => {
-    // console.log("Username:", name);
-    // console.log("Password:", pass);
-  };
-  const handleSubmit=()=>{
-    authService.login(name,pass)
-  }
   return (
     <div className="box">
       <div className="leftside">
@@ -41,17 +39,25 @@ function Login() {
           type="text"
           placeholder="Username"
           value={name}
-          onChange={handleName}
+          onChange={(e) => setName(e.target.value)}
         />
 
         <input
           type="password"
           placeholder="Password"
           value={pass}
-          onChange={handlePass}
+          onChange={(e) => setPass(e.target.value)}
         />
 
-        <button onClick={handleLogin}>LOGIN</button>
+        <button onClick={handleSubmit}>LOGIN</button>
+
+        <p className="signup-text">
+          Don't have an account?
+        </p>
+
+     <Link to="/signup" id="one">
+     Sign up
+     </Link>
       </div>
     </div>
   );

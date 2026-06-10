@@ -1,17 +1,11 @@
-import Login from "./auth/Login";
+import { RouterProvider } from "react-router";
+import router from './router/Router'
 
 function App() {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Login />
-    </div>
+    <>
+    <RouterProvider router={router} />
+    </>
   );
 }
 
