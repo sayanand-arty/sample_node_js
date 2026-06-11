@@ -1,14 +1,20 @@
- import { Outlet } from "react-router";
+import "./layout.css";
+import { Link, Outlet } from "react-router-dom";
 
- function layout (){
-    return(
-        <>
-        <div id = 'header'>
-
+function Layout() {
+  return (
+    <>
+      <div id="header">
+        <div className="nav-links">
+          <Link to="/home">Home</Link>
+          <Link to="/dashboard">Dashboard</Link>
+          <Link to="/profile">Profile</Link>
         </div>
-        <Outlet />
-        <div></div>
-            </>
-    );
- }
- export default Layout;
+      </div>
+
+      <Outlet />
+    </>
+  );
+}
+
+export default Layout;

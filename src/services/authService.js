@@ -13,6 +13,20 @@ const authService = {
 
     },
     //sign up button
+    signup: async (name,email, pass)=>{
+        console.log(name,email,pass)
+        try{
+            const res = await api.post('/signup',{name,email, pass})
+            return res.data
+        }catch(err){
+            console.log(err);
+                return err
+        }
+
+    },
+
+
+
 }
 export default authService;
 // const car={

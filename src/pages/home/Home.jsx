@@ -1,10 +1,11 @@
-import './home.css'
+import "./home.css";
 
-function home(){
-    return(
-        <>
-        <h1>home</h1>
-        </>
-    );
+function Home() {
+  return (
+    <div className="home-container">
+      <h1>Home</h1>
+    </div>
+  );
 }
+
 export default Home;

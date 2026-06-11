@@ -1,5 +1,32 @@
+body{
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg,#1f6fff,#9b59ff);
+}
+
 #header{
-    height: 100px;
     width: 100%;
-    color: black;
+    height: 70px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+}
+
+.home-container{
+    min-height: calc(100vh - 70px);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.home-container h1{
+    font-size: 80px;
+    color: white;
 }

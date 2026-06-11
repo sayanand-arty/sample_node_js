@@ -8,6 +8,15 @@ body {
   background: linear-gradient(135deg, #1f6fff, #9b59ff);
 }
 
+/* CENTER PAGE */
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* LOGIN BOX */
 .box {
   height: 450px;
   width: 850px;
@@ -17,21 +26,18 @@ body {
   background: whitesmoke;
 }
 
+/* LEFT SIDE */
 .leftside {
   width: 60%;
   position: relative;
   overflow: hidden;
-  color: white;
 }
 
 .leftside img {
   position: absolute;
   width: 100%;
   height: 100%;
-  top: 0;
-  left: 0;
   object-fit: cover;
-  z-index: 0;
 }
 
 .leftside h1,
@@ -54,6 +60,7 @@ body {
   color: black;
 }
 
+/* RIGHT SIDE */
 .rightside {
   width: 40%;
   background: white;
@@ -75,6 +82,7 @@ body {
   border: none;
   border-radius: 20px;
   background: #070707;
+  color: white;
 }
 
 .rightside button {
@@ -87,53 +95,49 @@ body {
   cursor: pointer;
   align-self: center;
 }
+
 .signup-text {
   margin-top: 15px;
-  font-size: 14px;
+  text-align: center;
   color: #555;
 }
 
-.signup-btn {
+/* SIGNUP BUTTON IN LOGIN PAGE */
+#one {
+  text-align: center;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 20px;
+  background: linear-gradient(to right, #ff8ac6, #6c63ff);
+  color: white;
   margin-top: 10px;
-  padding: 10px;
-  width: 100%;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
 }
 
-.signup-btn:hover {
-  opacity: 0.9;
-}
-.signup-container {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
+/* SIGNUP PAGE */
 .signup-box {
-  width: 400px;
+  width: 450px;
   background: white;
   padding: 40px;
   border-radius: 15px;
+
   display: flex;
   flex-direction: column;
   gap: 15px;
+
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
 .signup-box h1 {
   text-align: center;
-  margin-bottom: 15px;
   color: black;
 }
 
 .signup-box input {
   padding: 12px;
-  border: 1px solid #ccc;
+  border: none;
   border-radius: 20px;
-  outline: none;
+  background: #070707;
+  color: white;
 }
 
 .signup-box button {
@@ -147,18 +151,10 @@ body {
 
 .login-link {
   text-align: center;
+  text-decoration: none;
   color: blue;
-  cursor: pointer;
-  margin-top: 10px;
 }
 
 .login-link:hover {
   text-decoration: underline;
-}
-#one { padding: 12px;
-  border: none;
-  border-radius: 20px;
-  background: linear-gradient(to right, #ff8ac6, #6c63ff);
-  color: white;
-  cursor: pointer;
 }
