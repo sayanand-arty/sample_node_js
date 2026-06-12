@@ -10,6 +10,10 @@ import Profile from "../pages/profile/Profile";
 
 const router = createBrowserRouter([
   {
+    path: "/",
+    element: <Login />
+  },
+  {
     path: "/login",
     element: <Login />
   },
@@ -31,9 +35,8 @@ const router = createBrowserRouter([
       },
       {
         path: "profile",
-        element: <Profile/>
-      } 
-
+        element: <Profile />
+      }
     ]
   }
 ]);

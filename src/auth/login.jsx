@@ -3,19 +3,38 @@ import loginImage from "./images.jpg/images.jpg";
 import authService from "../services/authService";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [pass, setPass] = useState("");
 
   const handleSubmit = async () => {
-    try {
-      const result = await authService.login(name, pass);
-      console.log(result);
-    } catch (err) {
-      console.log(err);
+  try {
+
+    const result =
+      await authService.login(
+        name,
+        pass
+      );
+
+    alert(result.message);
+    navigate("/home");
+
+    console.log(result);
+
+  } catch (error) {
+
+    if (error.response) {
+      alert(
+        error.response.data.message
+      );
     }
-  };
+
+    console.log(error);
+  }
+};
 
   return (
     <div className="page-container">

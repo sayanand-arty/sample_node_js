@@ -1,39 +1,45 @@
-import api from "./api"
+import api from "./api";
 
 const authService = {
-    login: async (name, pass)=>{
-        console.log(name,pass)
-        try{
-            const res = await api.post('/login',{name, pass})
-            return res.data
-        }catch(err){
-            console.log(err);
-                return err
+
+  signup: async (name, email, pass) => {
+    try {
+      const res = await api.post(
+        "/signup",
+        {
+          name,
+          email,
+          pass,
         }
+      );
 
-    },
-    //sign up button
-    signup: async (name,email, pass)=>{
-        console.log(name,email,pass)
-        try{
-            const res = await api.post('/signup',{name,email, pass})
-            return res.data
-        }catch(err){
-            console.log(err);
-                return err
+      return res.data;
+
+    } catch (err) {
+      console.log(err);
+
+      throw err;
+    }
+  },
+
+  login: async (name, pass) => {
+    try {
+      const res = await api.post(
+        "/login",
+        {
+          name,
+          pass,
         }
+      );
 
-    },
+      return res.data;
 
+    } catch (err) {
+      console.log(err);
 
+      throw err;
+    }
+  },
+};
 
-}
 export default authService;
-// const car={
-//     color:'red',
-//     model:2018,
-//     is_insured:false,
-//     start:()=>{
-
-//     }
-// }
