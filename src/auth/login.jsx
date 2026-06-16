@@ -18,6 +18,14 @@ function Login() {
         name,
         pass
       );
+      if (result.success) {
+  localStorage.setItem(
+    "user",
+    JSON.stringify(result.user)
+  );
+
+  navigate("/dashboard");
+}
 
     alert(result.message);
     navigate("/home");
