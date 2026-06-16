@@ -1,81 +1,129 @@
 import "./login.css";
 import loginImage from "./images.jpg/images.jpg";
 import authService from "../services/authService";
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+
+import { Link, useNavigate } from "react-router-dom";
+
+import { useFormik } from "formik";
+import * as Yup from "yup";
+
+const loginSchema = Yup.object({
+  name: Yup.string()
+    .required("Username is required"),
+
+  pass: Yup.string()
+    .required("Password is required")
+});
 
 function Login() {
+
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [pass, setPass] = useState("");
 
-  const handleSubmit = async () => {
-  try {
+  const formik = useFormik({
 
-    const result =
-      await authService.login(
-        name,
-        pass
-      );
-      if (result.success) {
-  localStorage.setItem(
-    "user",
-    JSON.stringify(result.user)
-  );
+    initialValues: {
+      name: "",
+      pass: ""
+    },
 
-  navigate("/dashboard");
-}
+    validationSchema: loginSchema,
 
-    alert(result.message);
-    navigate("/home");
+    onSubmit: async (values) => {
 
-    console.log(result);
+      try {
 
-  } catch (error) {
+        const result =
+          await authService.login(
+            values.name,
+            values.pass
+          );
 
-    if (error.response) {
-      alert(
-        error.response.data.message
-      );
+        if (result.success) {
+
+          localStorage.setItem(
+            "user",
+            JSON.stringify(result.user)
+          );
+
+          alert(result.message);
+
+          navigate("/dashboard");
+        }
+
+      } catch (error) {
+
+        if (error.response) {
+          alert(
+            error.response.data.message
+          );
+        }
+
+        console.log(error);
+      }
+
     }
 
-    console.log(error);
-  }
-};
+  });
 
   return (
     <div className="page-container">
+
       <div className="box">
 
         <div className="leftside">
-          <img src={loginImage} alt="welcome" />
+
+          <img
+            src={loginImage}
+            alt="welcome"
+          />
 
           <h1>Welcome</h1>
 
           <p>
             This is a website which shows how a login page works made up of React.
           </p>
+
         </div>
 
         <div className="rightside">
+
           <h3>User Login</h3>
 
           <input
             type="text"
+            name="name"
             placeholder="Username"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
+
+          {formik.touched.name &&
+            formik.errors.name && (
+              <p className="error">
+                {formik.errors.name}
+              </p>
+          )}
 
           <input
             type="password"
+            name="pass"
             placeholder="Password"
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
+            value={formik.values.pass}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
 
-          <button onClick={handleSubmit}>
+          {formik.touched.pass &&
+            formik.errors.pass && (
+              <p className="error">
+                {formik.errors.pass}
+              </p>
+          )}
+
+          <button
+            onClick={formik.handleSubmit}
+          >
             LOGIN
           </button>
 
@@ -83,12 +131,17 @@ function Login() {
             Don't have an account?
           </p>
 
-          <Link to="/signup" id="one">
+          <Link
+            to="/signup"
+            id="one"
+          >
             Sign Up
           </Link>
+
         </div>
 
       </div>
+
     </div>
   );
 }
