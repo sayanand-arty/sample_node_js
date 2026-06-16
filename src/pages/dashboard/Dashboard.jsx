@@ -1,7 +1,7 @@
 import "./dashboard.css";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-
+import { useEffect, useState } from "react";
+import expenseService from "../../services/expenseService";
 import {
   FaHome,
   FaChartPie,
@@ -11,6 +11,10 @@ import {
 function Dashboard() {
 
   const navigate = useNavigate();
+
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
 
   const user = JSON.parse(
     localStorage.getItem("user")
@@ -30,7 +34,32 @@ function Dashboard() {
 
     navigate("/login");
   };
+    const handleAddExpense = async () => {
 
+  try {
+
+    const result =
+      await expenseService.addExpense(
+        title,
+        amount,
+        category,
+        user._id
+      );
+
+    alert(result.message);
+
+    setTitle("");
+    setAmount("");
+    setCategory("");
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert("Failed to add expense");
+
+  }
+};
   return (
     <div className="dashboard">
 
@@ -80,6 +109,45 @@ function Dashboard() {
 
         <div className="dashboard-header">
           <h1>Dashboard</h1>
+        </div>
+
+        {/* Expense Form */}
+
+        <div className="expense-form">
+
+          <input
+            type="text"
+            placeholder="Expense Title"
+            value={title}
+            onChange={(e) =>
+              setTitle(e.target.value)
+            }
+          />
+
+          <input
+            type="number"
+            placeholder="Amount"
+            value={amount}
+            onChange={(e) =>
+              setAmount(e.target.value)
+            }
+          />
+
+          <input
+            type="text"
+            placeholder="Category"
+            value={category}
+            onChange={(e) =>
+              setCategory(e.target.value)
+            }
+          />
+
+          <button
+  onClick={handleAddExpense}
+>
+  Add Expense
+</button>
+
         </div>
 
         <div className="cards">

@@ -158,3 +158,9 @@ body {
 .login-link:hover {
   text-decoration: underline;
 }
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 10px;
+}
