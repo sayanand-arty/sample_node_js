@@ -15,6 +15,15 @@ function Dashboard() {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [expenses, setExpenses] = useState([]);
+  const totalExpenses = expenses.reduce(
+  (sum, item) =>
+    sum + Number(item.amount),
+  0
+);
+
+const totalTransactions =
+  expenses.length;
 
   const user = JSON.parse(
     localStorage.getItem("user")
@@ -22,11 +31,35 @@ function Dashboard() {
 
   useEffect(() => {
 
-    if (!user) {
-      navigate("/login");
-    }
+  if (!user) {
+    navigate("/login");
+    return;
+  }
 
-  }, []);
+  loadExpenses();
+
+}, []);
+  const handleDeleteExpense =
+  async (id) => {
+
+  try {
+
+    const result =
+      await expenseService.deleteExpense(
+        id
+      );
+
+    alert(result.message);
+
+    loadExpenses();
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+};
 
   const handleLogout = () => {
 
@@ -34,7 +67,42 @@ function Dashboard() {
 
     navigate("/login");
   };
+  const loadExpenses = async () => {
+
+  try {
+
+    const result =
+      await expenseService.getExpenses(
+        user._id
+      );
+
+    setExpenses(
+      result.expenses
+    );
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+};
+
+
     const handleAddExpense = async () => {
+
+  if (
+    !title ||
+    !amount ||
+    !category
+  ) {
+
+    alert(
+      "Please fill all fields"
+    );
+
+    return;
+  }
 
   try {
 
@@ -52,13 +120,18 @@ function Dashboard() {
     setAmount("");
     setCategory("");
 
+    loadExpenses();
+
   } catch (error) {
 
     console.log(error);
 
-    alert("Failed to add expense");
+    alert(
+      "Failed to add expense"
+    );
 
   }
+
 };
   return (
     <div className="dashboard">
@@ -133,14 +206,41 @@ function Dashboard() {
             }
           />
 
-          <input
-            type="text"
-            placeholder="Category"
-            value={category}
-            onChange={(e) =>
-              setCategory(e.target.value)
-            }
-          />
+          <select
+  value={category}
+  onChange={(e) =>
+    setCategory(e.target.value)
+  }
+>
+  <option value="">
+    Select Category
+  </option>
+
+  <option value="Food">
+    Food
+  </option>
+
+  <option value="Travel">
+    Travel
+  </option>
+
+  <option value="Shopping">
+    Shopping
+  </option>
+
+  <option value="Bills">
+    Bills
+  </option>
+
+  <option value="Health">
+    Health
+  </option>
+
+  <option value="Entertainment">
+    Entertainment
+  </option>
+
+</select>
 
           <button
   onClick={handleAddExpense}
@@ -152,27 +252,27 @@ function Dashboard() {
 
         <div className="cards">
 
-          <div className="card">
-            <h3>Total Expenses</h3>
-            <p>₹12,450</p>
-          </div>
+  <div className="card">
+    <h3>Total Expenses</h3>
+    <p>₹{totalExpenses}</p>
+  </div>
 
-          <div className="card">
-            <h3>Total Income</h3>
-            <p>₹25,000</p>
-          </div>
+  <div className="card">
+    <h3>Total Income</h3>
+    <p>₹0</p>
+  </div>
 
-          <div className="card">
-            <h3>Total Savings</h3>
-            <p>₹12,550</p>
-          </div>
+  <div className="card">
+    <h3>Total Savings</h3>
+    <p>₹{-totalExpenses}</p>
+  </div>
 
-          <div className="card">
-            <h3>Transactions</h3>
-            <p>28</p>
-          </div>
+  <div className="card">
+    <h3>Transactions</h3>
+    <p>{totalTransactions}</p>
+  </div>
 
-        </div>
+</div>
 
         <div className="dashboard-grid">
 
@@ -187,11 +287,31 @@ function Dashboard() {
           <div className="recent-box">
             <h2>Recent Transactions</h2>
 
-            <ul>
-              <li>Food - ₹500</li>
-              <li>Travel - ₹1000</li>
-              <li>Shopping - ₹1500</li>
-            </ul>
+<ul>
+
+  {expenses.map((item) => (
+
+    <li key={item._id}>
+
+      {item.title}
+      {" - ₹"}
+      {item.amount}
+
+      <button
+        onClick={() =>
+          handleDeleteExpense(
+            item._id
+          )
+        }
+      >
+        Delete
+      </button>
+
+    </li>
+
+  ))}
+
+</ul>
           </div>
 
           <div className="pie-box">
@@ -203,12 +323,21 @@ function Dashboard() {
           </div>
 
           <div className="summary-box">
-            <h2>Summary</h2>
+  <h2>Summary</h2>
 
-            <p>Total Income : ₹25,000</p>
-            <p>Total Expense : ₹12,450</p>
-            <p>Total Savings : ₹12,550</p>
-          </div>
+  <p>Total Income : ₹0</p>
+
+  <p>
+    Total Expense : ₹
+    {totalExpenses}
+  </p>
+
+  <p>
+    Total Savings : ₹
+    {-totalExpenses}
+  </p>
+
+</div>
 
         </div>
 
