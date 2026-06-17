@@ -2,12 +2,8 @@ import "./dashboard.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import expenseService from "../../services/expenseService";
-import {
-  FaHome,
-  FaChartPie,
-  FaUser
-} from "react-icons/fa";
-
+import { FaHome, FaChartPie, FaUser } from "react-icons/fa";
+import {PieChart,Pie,Cell,Tooltip,Legend,BarChart,Bar,XAxis,YAxis,CartesianGrid} from "recharts";
 function Dashboard() {
 
   const navigate = useNavigate();
@@ -17,13 +13,47 @@ function Dashboard() {
   const [category, setCategory] = useState("");
   const [expenses, setExpenses] = useState([]);
   const totalExpenses = expenses.reduce(
-  (sum, item) =>
-    sum + Number(item.amount),
-  0
-);
+    (sum, item) =>
+      sum + Number(item.amount),
+    0
+  );
 
-const totalTransactions =
-  expenses.length;
+  const totalTransactions =
+    expenses.length;
+  const chartData = [];
+
+  expenses.forEach((item) => {
+
+    const existing =
+      chartData.find(
+        (data) =>
+          data.name === item.category
+      );
+
+    if (existing) {
+
+      existing.value +=
+        Number(item.amount);
+
+    } else {
+
+      chartData.push({
+        name: item.category,
+        value: Number(item.amount)
+      });
+
+    }
+
+  });
+
+  const COLORS = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#AF19FF",
+    "#FF4560"
+  ];
 
   const user = JSON.parse(
     localStorage.getItem("user")
@@ -31,35 +61,35 @@ const totalTransactions =
 
   useEffect(() => {
 
-  if (!user) {
-    navigate("/login");
-    return;
-  }
-
-  loadExpenses();
-
-}, []);
-  const handleDeleteExpense =
-  async (id) => {
-
-  try {
-
-    const result =
-      await expenseService.deleteExpense(
-        id
-      );
-
-    alert(result.message);
+    if (!user) {
+      navigate("/login");
+      return;
+    }
 
     loadExpenses();
 
-  } catch (error) {
+  }, []);
+  const handleDeleteExpense =
+    async (id) => {
 
-    console.log(error);
+      try {
 
-  }
+        const result =
+          await expenseService.deleteExpense(
+            id
+          );
 
-};
+        alert(result.message);
+
+        loadExpenses();
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    };
 
   const handleLogout = () => {
 
@@ -69,70 +99,70 @@ const totalTransactions =
   };
   const loadExpenses = async () => {
 
-  try {
+    try {
 
-    const result =
-      await expenseService.getExpenses(
-        user._id
+      const result =
+        await expenseService.getExpenses(
+          user._id
+        );
+
+      setExpenses(
+        result.expenses
       );
 
-    setExpenses(
-      result.expenses
-    );
+    } catch (error) {
 
-  } catch (error) {
+      console.log(error);
 
-    console.log(error);
+    }
 
-  }
-
-};
+  };
 
 
-    const handleAddExpense = async () => {
+  const handleAddExpense = async () => {
 
-  if (
-    !title ||
-    !amount ||
-    !category
-  ) {
+    if (
+      !title ||
+      !amount ||
+      !category
+    ) {
 
-    alert(
-      "Please fill all fields"
-    );
-
-    return;
-  }
-
-  try {
-
-    const result =
-      await expenseService.addExpense(
-        title,
-        amount,
-        category,
-        user._id
+      alert(
+        "Please fill all fields"
       );
 
-    alert(result.message);
+      return;
+    }
 
-    setTitle("");
-    setAmount("");
-    setCategory("");
+    try {
 
-    loadExpenses();
+      const result =
+        await expenseService.addExpense(
+          title,
+          amount,
+          category,
+          user._id
+        );
 
-  } catch (error) {
+      alert(result.message);
 
-    console.log(error);
+      setTitle("");
+      setAmount("");
+      setCategory("");
 
-    alert(
-      "Failed to add expense"
-    );
+      loadExpenses();
 
-  }
+    } catch (error) {
 
-};
+      console.log(error);
+
+      alert(
+        "Failed to add expense"
+      );
+
+    }
+
+  };
   return (
     <div className="dashboard">
 
@@ -207,137 +237,203 @@ const totalTransactions =
           />
 
           <select
-  value={category}
-  onChange={(e) =>
-    setCategory(e.target.value)
-  }
->
-  <option value="">
-    Select Category
-  </option>
+            value={category}
+            onChange={(e) =>
+              setCategory(e.target.value)
+            }
+          >
+            <option value="">
+              Select Category
+            </option>
 
-  <option value="Food">
-    Food
-  </option>
+            <option value="Food">
+              Food
+            </option>
 
-  <option value="Travel">
-    Travel
-  </option>
+            <option value="Travel">
+              Travel
+            </option>
 
-  <option value="Shopping">
-    Shopping
-  </option>
+            <option value="Shopping">
+              Shopping
+            </option>
 
-  <option value="Bills">
-    Bills
-  </option>
+            <option value="Bills">
+              Bills
+            </option>
 
-  <option value="Health">
-    Health
-  </option>
+            <option value="Health">
+              Health
+            </option>
 
-  <option value="Entertainment">
-    Entertainment
-  </option>
+            <option value="Entertainment">
+              Entertainment
+            </option>
 
-</select>
+          </select>
 
           <button
-  onClick={handleAddExpense}
->
-  Add Expense
-</button>
+            onClick={handleAddExpense}
+          >
+            Add Expense
+          </button>
 
         </div>
 
         <div className="cards">
 
-  <div className="card">
-    <h3>Total Expenses</h3>
-    <p>₹{totalExpenses}</p>
-  </div>
+          <div className="card">
+            <h3>Total Expenses</h3>
+            <p>₹{totalExpenses}</p>
+          </div>
 
-  <div className="card">
-    <h3>Total Income</h3>
-    <p>₹0</p>
-  </div>
+          <div className="card">
+            <h3>Total Income</h3>
+            <p>₹0</p>
+          </div>
 
-  <div className="card">
-    <h3>Total Savings</h3>
-    <p>₹{-totalExpenses}</p>
-  </div>
+          <div className="card">
+            <h3>Total Savings</h3>
+            <p>₹{-totalExpenses}</p>
+          </div>
 
-  <div className="card">
-    <h3>Transactions</h3>
-    <p>{totalTransactions}</p>
-  </div>
+          <div className="card">
+            <h3>Transactions</h3>
+            <p>{totalTransactions}</p>
+          </div>
 
-</div>
+        </div>
 
         <div className="dashboard-grid">
 
           <div className="chart-box">
-            <h2>Expense Overview</h2>
 
-            <div className="placeholder">
-              Chart Coming Soon
-            </div>
-          </div>
+  <h2>Expense Overview</h2>
+
+  <BarChart
+    width={700}
+    height={250}
+    data={chartData}
+  >
+
+    <CartesianGrid strokeDasharray="3 3" />
+
+    <XAxis dataKey="name" />
+
+    <YAxis />
+
+    <Tooltip />
+
+    <Bar
+      dataKey="value"
+      fill="#4f46e5"
+    />
+
+  </BarChart>
+
+</div>
 
           <div className="recent-box">
             <h2>Recent Transactions</h2>
 
-<ul>
+            <ul>
 
-  {expenses.map((item) => (
+              {expenses.map((item) => (
 
-    <li key={item._id}>
+                <li key={item._id}>
 
-      {item.title}
-      {" - ₹"}
-      {item.amount}
+                  <div>
+                    <strong>
+                      {item.title}
+                    </strong>
 
-      <button
-        onClick={() =>
-          handleDeleteExpense(
-            item._id
-          )
-        }
-      >
-        Delete
-      </button>
+                    <br />
 
-    </li>
+                    <small>
+                      {item.category}
+                    </small>
+                  </div>
 
-  ))}
+                  <div>
+                    ₹{item.amount}
 
-</ul>
+                    <button
+                      onClick={() =>
+                        handleDeleteExpense(
+                          item._id
+                        )
+                      }
+                    >
+                      Delete
+                    </button>
+                  </div>
+
+                </li>
+
+              ))}
+
+            </ul>
           </div>
 
           <div className="pie-box">
+
             <h2>Expense Categories</h2>
 
-            <div className="placeholder">
-              Pie Chart
-            </div>
+            <PieChart
+              width={350}
+              height={250}
+            >
+
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                dataKey="value"
+                label
+              >
+
+                {chartData.map(
+                  (entry, index) => (
+
+                    <Cell
+                      key={index}
+                      fill={
+                        COLORS[
+                        index %
+                        COLORS.length
+                        ]
+                      }
+                    />
+
+                  )
+                )}
+
+              </Pie>
+
+              <Tooltip />
+              <Legend />
+
+            </PieChart>
+
           </div>
 
           <div className="summary-box">
-  <h2>Summary</h2>
+            <h2>Summary</h2>
 
-  <p>Total Income : ₹0</p>
+            <p>Total Income : ₹0</p>
 
-  <p>
-    Total Expense : ₹
-    {totalExpenses}
-  </p>
+            <p>
+              Total Expense : ₹
+              {totalExpenses}
+            </p>
 
-  <p>
-    Total Savings : ₹
-    {-totalExpenses}
-  </p>
+            <p>
+              Total Savings : ₹
+              {-totalExpenses}
+            </p>
 
-</div>
+          </div>
 
         </div>
 
