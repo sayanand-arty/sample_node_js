@@ -35,6 +35,14 @@ function Dashboard() {
   const totalTransactions =
     expenses.length;
     const totalSavings = totalIncome - totalExpenses;
+    localStorage.setItem(
+  "dashboardStats",
+  JSON.stringify({
+    totalIncome,
+    totalExpenses,
+    totalSavings
+  })
+);
   const chartData = [];
 
   expenses.forEach((item) => {
@@ -86,26 +94,34 @@ function Dashboard() {
 
 }, []);
   const handleDeleteExpense =
-    async (id) => {
+async (id) => {
 
-      try {
+  if (
+    !window.confirm(
+      "Delete this expense?"
+    )
+  ) {
+    return;
+  }
 
-        const result =
-          await expenseService.deleteExpense(
-            id
-          );
+  try {
 
-        alert(result.message);
+    const result =
+      await expenseService.deleteExpense(
+        id
+      );
 
-        loadExpenses();
+    alert(result.message);
 
-      } catch (error) {
+    loadExpenses();
 
-        console.log(error);
+  } catch (error) {
 
-      }
+    console.log(error);
 
-    };
+  }
+
+};
     const handleEditExpense =
 (item) => {
 
@@ -211,6 +227,57 @@ function Dashboard() {
 };
 
   const handleAddExpense = async () => {
+    const handleAddExpense = async () => {
+
+  if (!title || !amount || !category) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  try {
+
+    let result;
+
+    if (editId) {
+
+      result =
+        await expenseService.updateExpense(
+          editId,
+          title,
+          amount,
+          category
+        );
+
+    } else {
+
+      result =
+        await expenseService.addExpense(
+          title,
+          amount,
+          category,
+          user._id
+        );
+
+    }
+
+    alert(result.message);
+
+    setTitle("");
+    setAmount("");
+    setCategory("");
+    setEditId(null);
+
+    loadExpenses();
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert("Operation Failed");
+
+  }
+
+};
 
   try {
 
@@ -415,55 +482,62 @@ function Dashboard() {
 
             <ul>
 
-              {expenses.map((item) => (
+  {expenses.map((item) => (
 
-                <li key={item._id}>
+    <li
+      key={item._id}
+      className="transaction-item"
+    >
 
-                  <div>
-                    <strong>
-                      {item.title}
-                    </strong>
+      <div className="transaction-info">
 
-                    <br />
+        <h4>{item.title}</h4>
 
-                    <small>
-                      {item.category}
-                    </small>
-                  </div>
+        <span className="category-badge">
+          {item.category}
+        </span>
 
-                  <div>
-                    ₹{item.amount}
+        <p>
+          {new Date(
+            item.createdAt
+          ).toLocaleDateString()}
+        </p>
 
-                    <div>
+      </div>
 
-  <button
-    onClick={() =>
-      handleEditExpense(
-        item
-      )
-    }
-  >
-    Edit
-  </button>
+      <div className="transaction-actions">
 
-  <button
-    onClick={() =>
-      handleDeleteExpense(
-        item._id
-      )
-    }
-  >
-    Delete
-  </button>
+        <span className="amount">
+          ₹{item.amount}
+        </span>
 
-</div>
-                  </div>
+        <button
+          className="edit-btn"
+          onClick={() =>
+            handleEditExpense(item)
+          }
+        >
+          Edit
+        </button>
 
-                </li>
+        <button
+          className="delete-btn"
+          onClick={() =>
+            handleDeleteExpense(
+              item._id
+            )
+          }
+        >
+          Delete
+        </button>
 
-              ))}
+      </div>
 
-            </ul>
+    </li>
+
+  ))}
+
+</ul>
           </div>
 
           <div className="pie-box">
@@ -512,7 +586,7 @@ function Dashboard() {
           <div className="summary-box">
             <h2>Summary</h2>
 
-            <p>Total Income : ₹0</p>
+            <p>Total Expense : ₹{totalExpenses}</p>
 
             <p>
   Total Income : ₹

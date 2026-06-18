@@ -1,9 +1,21 @@
 import "./profile.css";
 import { useState } from "react";
+const stats = JSON.parse(
+  localStorage.getItem(
+    "dashboardStats"
+  )
+) || {
+  totalIncome: 0,
+  totalExpenses: 0,
+  totalSavings: 0
+};
 
 function Profile() {
+
   const [profile, setProfile] = useState(() => {
-    const savedProfile = localStorage.getItem("profile");
+
+    const savedProfile =
+      localStorage.getItem("profile");
 
     return savedProfile
       ? JSON.parse(savedProfile)
@@ -15,18 +27,24 @@ function Profile() {
           age: "",
           bio: "",
         };
+
   });
 
-  const [editing, setEditing] = useState(true);
+  const [editing, setEditing] =
+    useState(true);
 
   const handleChange = (e) => {
+
     setProfile({
       ...profile,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.value,
     });
+
   };
 
   const saveChanges = (e) => {
+
     e.preventDefault();
 
     localStorage.setItem(
@@ -34,20 +52,23 @@ function Profile() {
       JSON.stringify(profile)
     );
 
-    console.log("Profile Saved:");
-    console.log(profile);
-
     setEditing(false);
 
-    alert("Profile Saved Successfully");
+    alert(
+      "Profile Saved Successfully"
+    );
+
   };
 
   return (
+
     <div className="profile-container">
+
       <form
         className="profile-card"
         onSubmit={saveChanges}
       >
+
         <h1>My Profile</h1>
 
         <input
@@ -103,21 +124,50 @@ function Profile() {
           disabled={!editing}
         />
 
+        <div className="profile-stats">
+
+          <div>
+            <h3>Income</h3>
+            <p>₹{stats.totalIncome}</p>
+          </div>
+
+          <div>
+            <h3>Expenses</h3>
+            <p>₹{stats.totalExpenses}</p>
+          </div>
+
+          <div>
+            <h3>Savings</h3>
+            <p>{stats.totalSavings}</p>
+          </div>
+
+        </div>
+
         {!editing ? (
+
           <button
             type="button"
-            onClick={() => setEditing(true)}
+            onClick={() =>
+              setEditing(true)
+            }
           >
             Edit Profile
           </button>
+
         ) : (
+
           <button type="submit">
             Save Changes
           </button>
+
         )}
+
       </form>
+
     </div>
+
   );
+
 }
 
 export default Profile;
