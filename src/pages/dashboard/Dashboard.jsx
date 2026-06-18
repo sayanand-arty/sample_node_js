@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import expenseService from "../../services/expenseService";
 import { FaHome, FaChartPie, FaUser } from "react-icons/fa";
 import {PieChart,Pie,Cell,Tooltip,Legend,BarChart,Bar,XAxis,YAxis,CartesianGrid} from "recharts";
+import incomeService from "../../services/incomeService";
+
+
+
+
 function Dashboard() {
 
   const navigate = useNavigate();
@@ -11,15 +16,25 @@ function Dashboard() {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [incomeTitle, setIncomeTitle] = useState("");
+  const [incomeAmount, setIncomeAmount] = useState("");
+  const [incomes, setIncomes] = useState([]);
+  const [editId, setEditId] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const totalExpenses = expenses.reduce(
     (sum, item) =>
       sum + Number(item.amount),
     0
   );
+  const totalIncome = incomes.reduce(
+  (sum, item) =>
+    sum + Number(item.amount),
+  0
+);
 
   const totalTransactions =
     expenses.length;
+    const totalSavings = totalIncome - totalExpenses;
   const chartData = [];
 
   expenses.forEach((item) => {
@@ -61,14 +76,15 @@ function Dashboard() {
 
   useEffect(() => {
 
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+  if (!user) {
+    navigate("/login");
+    return;
+  }
 
-    loadExpenses();
+  loadExpenses();
+  loadIncome();
 
-  }, []);
+}, []);
   const handleDeleteExpense =
     async (id) => {
 
@@ -90,6 +106,20 @@ function Dashboard() {
       }
 
     };
+    const handleEditExpense =
+(item) => {
+
+  setEditId(item._id);
+
+  setTitle(item.title);
+
+  setAmount(item.amount);
+
+  setCategory(
+    item.category
+  );
+
+};
 
   const handleLogout = () => {
 
@@ -117,26 +147,88 @@ function Dashboard() {
     }
 
   };
+  const loadIncome = async () => {
 
+  try {
+
+    const result =
+      await incomeService.getIncome(
+        user._id
+      );
+
+    setIncomes(
+      result.income
+    );
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+
+};
+
+  const handleAddIncome = async () => {
+
+  if (
+    !incomeTitle ||
+    !incomeAmount
+  ) {
+
+    alert(
+      "Please fill all income fields"
+    );
+
+    return;
+  }
+
+  try {
+
+    const result =
+      await incomeService.addIncome(
+        incomeTitle,
+        incomeAmount,
+        user._id
+      );
+
+    alert(result.message);
+
+    setIncomeTitle("");
+    setIncomeAmount("");
+
+    loadIncome();
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert(
+      "Failed to add income"
+    );
+
+  }
+
+};
 
   const handleAddExpense = async () => {
 
-    if (
-      !title ||
-      !amount ||
-      !category
-    ) {
+  try {
 
-      alert(
-        "Please fill all fields"
-      );
+    let result;
 
-      return;
-    }
+    if (editId) {
 
-    try {
+      result =
+        await expenseService.updateExpense(
+          editId,
+          title,
+          amount,
+          category
+        );
 
-      const result =
+    } else {
+
+      result =
         await expenseService.addExpense(
           title,
           amount,
@@ -144,69 +236,28 @@ function Dashboard() {
           user._id
         );
 
-      alert(result.message);
-
-      setTitle("");
-      setAmount("");
-      setCategory("");
-
-      loadExpenses();
-
-    } catch (error) {
-
-      console.log(error);
-
-      alert(
-        "Failed to add expense"
-      );
-
     }
 
-  };
+    alert(result.message);
+
+    setTitle("");
+    setAmount("");
+    setCategory("");
+    setEditId(null);
+
+    loadExpenses();
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert("Operation Failed");
+
+  }
+
+};
   return (
     <div className="dashboard">
-
-      <div className="sidebar">
-
-        <div className="user-box">
-
-          <div className="avatar">
-            {user?.name?.charAt(0).toUpperCase()}
-          </div>
-
-          <h2>{user?.name}</h2>
-
-          <p>{user?.email}</p>
-
-        </div>
-
-        <div className="menu">
-
-          <div className="menu-item">
-            <FaHome />
-            <span>Home</span>
-          </div>
-
-          <div className="menu-item active">
-            <FaChartPie />
-            <span>Dashboard</span>
-          </div>
-
-          <div className="menu-item">
-            <FaUser />
-            <span>Profile</span>
-          </div>
-
-        </div>
-
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-
-      </div>
 
       <div className="main-content">
 
@@ -216,69 +267,95 @@ function Dashboard() {
 
         {/* Expense Form */}
 
-        <div className="expense-form">
+<div className="expense-form">
 
-          <input
-            type="text"
-            placeholder="Expense Title"
-            value={title}
-            onChange={(e) =>
-              setTitle(e.target.value)
-            }
-          />
+  <input
+    type="text"
+    placeholder="Expense Title"
+    value={title}
+    onChange={(e) =>
+      setTitle(e.target.value)
+    }
+  />
 
-          <input
-            type="number"
-            placeholder="Amount"
-            value={amount}
-            onChange={(e) =>
-              setAmount(e.target.value)
-            }
-          />
+  <input
+    type="number"
+    placeholder="Amount"
+    value={amount}
+    onChange={(e) =>
+      setAmount(e.target.value)
+    }
+  />
 
-          <select
-            value={category}
-            onChange={(e) =>
-              setCategory(e.target.value)
-            }
-          >
-            <option value="">
-              Select Category
-            </option>
+  <select
+    value={category}
+    onChange={(e) =>
+      setCategory(e.target.value)
+    }
+  >
+    <option value="">
+      Select Category
+    </option>
+    <option value="Food">
+      Food
+    </option>
+    <option value="Travel">
+      Travel
+    </option>
+    <option value="Shopping">
+      Shopping
+    </option>
+     <option value="Entertainment">
+    Entertainment
+  </option>
+  <option value="Bills">
+    Bills
+  </option>
+  </select>
 
-            <option value="Food">
-              Food
-            </option>
+  <button
+  onClick={handleAddExpense}
+>
+  {editId
+    ? "Update Expense"
+    : "Add Expense"}
+</button>
 
-            <option value="Travel">
-              Travel
-            </option>
+</div>
 
-            <option value="Shopping">
-              Shopping
-            </option>
+{/* Income Form */}
 
-            <option value="Bills">
-              Bills
-            </option>
+<div className="expense-form">
 
-            <option value="Health">
-              Health
-            </option>
+  <input
+    type="text"
+    placeholder="Income Title"
+    value={incomeTitle}
+    onChange={(e) =>
+      setIncomeTitle(
+        e.target.value
+      )
+    }
+  />
 
-            <option value="Entertainment">
-              Entertainment
-            </option>
+  <input
+    type="number"
+    placeholder="Income Amount"
+    value={incomeAmount}
+    onChange={(e) =>
+      setIncomeAmount(
+        e.target.value
+      )
+    }
+  />
 
-          </select>
+  <button
+    onClick={handleAddIncome}
+  >
+    Add Income
+  </button>
 
-          <button
-            onClick={handleAddExpense}
-          >
-            Add Expense
-          </button>
-
-        </div>
+</div>
 
         <div className="cards">
 
@@ -289,12 +366,12 @@ function Dashboard() {
 
           <div className="card">
             <h3>Total Income</h3>
-            <p>₹0</p>
+            <p>₹{totalIncome}</p>
           </div>
 
           <div className="card">
             <h3>Total Savings</h3>
-            <p>₹{-totalExpenses}</p>
+            <p>₹{totalSavings}</p>
           </div>
 
           <div className="card">
@@ -357,15 +434,29 @@ function Dashboard() {
                   <div>
                     ₹{item.amount}
 
-                    <button
-                      onClick={() =>
-                        handleDeleteExpense(
-                          item._id
-                        )
-                      }
-                    >
-                      Delete
-                    </button>
+                    <div>
+
+  <button
+    onClick={() =>
+      handleEditExpense(
+        item
+      )
+    }
+  >
+    Edit
+  </button>
+
+  <button
+    onClick={() =>
+      handleDeleteExpense(
+        item._id
+      )
+    }
+  >
+    Delete
+  </button>
+
+</div>
                   </div>
 
                 </li>
@@ -424,14 +515,14 @@ function Dashboard() {
             <p>Total Income : ₹0</p>
 
             <p>
-              Total Expense : ₹
-              {totalExpenses}
-            </p>
+  Total Income : ₹
+  {totalIncome}
+</p>
 
             <p>
-              Total Savings : ₹
-              {-totalExpenses}
-            </p>
+  Total Savings : ₹
+  {totalSavings}
+</p>
 
           </div>
 

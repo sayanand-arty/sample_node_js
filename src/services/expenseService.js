@@ -38,6 +38,25 @@ const expenseService = {
     );
 
     return res.data;
+  },
+
+  updateExpense: async (
+    id,
+    title,
+    amount,
+    category
+  ) => {
+
+    const res = await api.put(
+      `/expense/${id}`,
+      {
+        title,
+        amount,
+        category
+      }
+    );
+
+    return res.data;
   }
 
 };
