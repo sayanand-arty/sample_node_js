@@ -1,78 +1,52 @@
 import { Link, useNavigate } from "react-router-dom";
-
 import "./login.css";
-
-import authService from "../services/authService";
-
+import { useAuth } from "../context/AuthContext";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
 const signupSchema = Yup.object({
-
-  name: Yup.string()
-    .min(3, "Minimum 3 characters")
-    .required("Name is required"),
-
-  email: Yup.string()
-    .email("Invalid email")
-    .required("Email is required"),
-
-  pass: Yup.string()
-    .min(8, "Password must be at least 8 characters")
-    .required("Password is required")
-
+  name: Yup.string().min(3, "Minimum 3 characters").required("Name is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  password: Yup.string().min(8, "Password must be at least 8 characters").required("Password is required"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password"), null], "Passwords must match")
+    .required("Confirm password is required"),
 });
 
 function Signup() {
-
   const navigate = useNavigate();
+  const { signup, loading } = useAuth();
 
   const formik = useFormik({
-
     initialValues: {
       name: "",
       email: "",
-      pass: ""
+      password: "",
+      confirmPassword: "",
     },
-
     validationSchema: signupSchema,
-
-    onSubmit: async (values) => {
-
+    onSubmit: async (values, { setStatus, setSubmitting }) => {
       try {
-
-        const result =
-          await authService.signup(
-            values.name,
-            values.email,
-            values.pass
-          );
-
-        alert(result.message);
-
-        navigate("/login");
-
+        await signup({
+          name: values.name,
+          email: values.email,
+          pass: values.password,
+        });
+        navigate("/dashboard");
       } catch (error) {
-
-        if (error.response) {
-          alert(
-            error.response.data.message
-          );
-        }
-
-        console.log(error);
+        setStatus(error?.response?.data?.message || error?.message || "Signup failed. Please try again.");
+      } finally {
+        setSubmitting(false);
       }
-
-    }
-
+    },
   });
 
   return (
     <div className="page-container">
-
       <div className="signup-box">
-
         <h1>Sign Up</h1>
+
+        {formik.status && <p className="error">{formik.status}</p>}
 
         <input
           type="text"
@@ -82,13 +56,7 @@ function Signup() {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
         />
-
-        {formik.touched.name &&
-          formik.errors.name && (
-            <p className="error">
-              {formik.errors.name}
-            </p>
-        )}
+        {formik.touched.name && formik.errors.name && <p className="error">{formik.errors.name}</p>}
 
         <input
           type="email"
@@ -98,45 +66,38 @@ function Signup() {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
         />
-
-        {formik.touched.email &&
-          formik.errors.email && (
-            <p className="error">
-              {formik.errors.email}
-            </p>
-        )}
+        {formik.touched.email && formik.errors.email && <p className="error">{formik.errors.email}</p>}
 
         <input
           type="password"
-          name="pass"
+          name="password"
           placeholder="Password"
-          value={formik.values.pass}
+          value={formik.values.password}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
         />
+        {formik.touched.password && formik.errors.password && <p className="error">{formik.errors.password}</p>}
 
-        {formik.touched.pass &&
-          formik.errors.pass && (
-            <p className="error">
-              {formik.errors.pass}
-            </p>
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder="Confirm Password"
+          value={formik.values.confirmPassword}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+        />
+        {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+          <p className="error">{formik.errors.confirmPassword}</p>
         )}
 
-        <button
-          onClick={formik.handleSubmit}
-        >
-          Sign Up
+        <button type="button" onClick={formik.handleSubmit} disabled={formik.isSubmitting || loading}>
+          {loading ? "Signing up..." : "Sign Up"}
         </button>
 
-        <Link
-          to="/login"
-          className="login-link"
-        >
+        <Link to="/login" className="login-link">
           Already have an account? Log In
         </Link>
-
       </div>
-
     </div>
   );
 }

@@ -29,6 +29,34 @@ const incomeService = {
     );
 
     return res.data;
+  },
+
+  updateIncome: async (
+    id,
+    title,
+    amount
+  ) => {
+
+    const res = await api.put(
+      `/income/${id}`,
+      {
+        title,
+        amount
+      }
+    );
+
+    return res.data;
+  },
+
+  deleteIncome: async (
+    id
+  ) => {
+
+    const res = await api.delete(
+      `/income/${id}`
+    );
+
+    return res.data;
   }
 
 };
