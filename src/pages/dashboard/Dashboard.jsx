@@ -2,9 +2,10 @@ import "./dashboard.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import expenseService from "../../services/expenseService";
+import incomeService from "../../services/incomeService";
+import transactionService from "../../services/transactionService";
 import { useAuth } from "../../context/AuthContext";
 import { PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
-import incomeService from "../../services/incomeService";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -16,13 +17,14 @@ function Dashboard() {
   const [incomeTitle, setIncomeTitle] = useState("");
   const [incomeAmount, setIncomeAmount] = useState("");
   const [incomes, setIncomes] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [incomeEditId, setIncomeEditId] = useState(null);
   const [editId, setEditId] = useState(null);
   const [expenses, setExpenses] = useState([]);
 
   const totalExpenses = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
   const totalIncome = incomes.reduce((sum, item) => sum + Number(item.amount), 0);
-  const totalTransactions = expenses.length;
+  const totalTransactions = transactions.length;
   const totalSavings = totalIncome - totalExpenses;
 
   localStorage.setItem(
@@ -51,6 +53,7 @@ function Dashboard() {
 
     loadExpenses();
     loadIncome();
+    loadTransactions();
   }, [loading, user]);
 
   const loadExpenses = async () => {
@@ -71,6 +74,19 @@ function Dashboard() {
     }
   };
 
+  const loadTransactions = async () => {
+    try {
+      const result = await transactionService.getTransactions(user._id);
+      const sorted = result.transactions
+        .slice()
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 10);
+      setTransactions(sorted);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleEditExpense = (item) => {
     setEditId(item._id);
     setTitle(item.title);
@@ -84,6 +100,7 @@ function Dashboard() {
       const result = await expenseService.deleteExpense(id);
       alert(result.message);
       loadExpenses();
+      loadTransactions();
     } catch (error) {
       console.log(error);
     }
@@ -101,6 +118,7 @@ function Dashboard() {
       const result = await incomeService.deleteIncome(id);
       alert(result.message);
       loadIncome();
+      loadTransactions();
     } catch (error) {
       console.log(error);
     }
@@ -130,6 +148,7 @@ function Dashboard() {
       setIncomeAmount("");
       setIncomeEditId(null);
       loadIncome();
+      loadTransactions();
     } catch (error) {
       console.log(error);
       alert("Failed to save income");
@@ -156,6 +175,7 @@ function Dashboard() {
       setCategory("");
       setEditId(null);
       loadExpenses();
+      loadTransactions();
     } catch (error) {
       console.log(error);
       alert("Operation Failed");
@@ -250,23 +270,37 @@ function Dashboard() {
           </div>
 
           <div className="recent-box">
-            <h2>Recent Transactions</h2>
+            <h2>Recent Activity</h2>
             <ul>
-              {expenses.map((item) => (
+              {transactions.map((item) => (
                 <li key={item._id} className="transaction-item">
                   <div className="transaction-info">
                     <h4>{item.title}</h4>
-                    <span className="category-badge">{item.category}</span>
-                    <p>{new Date(item.createdAt).toLocaleDateString()}</p>
+                    <p>{new Date(item.date).toLocaleDateString()}</p>
                   </div>
                   <div className="transaction-actions">
-                    <span className="amount">₹{item.amount}</span>
-                    <button className="edit-btn" onClick={() => handleEditExpense(item)}>
-                      Edit
-                    </button>
-                    <button className="delete-btn" onClick={() => handleDeleteExpense(item._id)}>
-                      Delete
-                    </button>
+                    <span className={`amount ${item.type === "income" ? "income" : "expense"}`}>
+                      {item.type === "income" ? "+" : "-"}₹{item.amount}
+                    </span>
+                    {item.type === "expense" ? (
+                      <>
+                        <button className="edit-btn" onClick={() => handleEditExpense(item)}>
+                          Edit
+                        </button>
+                        <button className="delete-btn" onClick={() => handleDeleteExpense(item._id)}>
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button className="edit-btn" onClick={() => handleEditIncome(item)}>
+                          Edit
+                        </button>
+                        <button className="delete-btn" onClick={() => handleDeleteIncome(item._id)}>
+                          Delete
+                        </button>
+                      </>
+                    )}
                   </div>
                 </li>
               ))}
